@@ -1,4 +1,4 @@
-# eventrail
+# EventRail
 
 [![Go Version](https://img.shields.io/badge/go-1.24+-00ADD8?logo=go&logoColor=white)](#installation)
 [![License](https://img.shields.io/badge/license-MIT-2ea44f)](#license)
