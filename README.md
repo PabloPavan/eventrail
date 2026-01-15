@@ -1,5 +1,11 @@
 # eventrail
 
+[![Go Version](https://img.shields.io/badge/go-1.24+-00ADD8?logo=go&logoColor=white)](#installation)
+[![License](https://img.shields.io/badge/license-MIT-2ea44f)](#license)
+[![SSE](https://img.shields.io/badge/transport-SSE-6e40c9)](#basic-usage)
+[![Release](https://img.shields.io/github/v/release/PabloPavan/eventrail?sort=semver)](https://github.com/PabloPavan/eventrail/releases)
+[![Redis](https://img.shields.io/badge/redis-Pub%2FSub-dc382d?logo=redis&logoColor=white)](#basic-usage)
+
 **Event-driven realtime delivery over Server-Sent Events (SSE), powered by Redis.**
 
 `eventrail` is a Go library for building **scalable real-time event delivery** using **Server-Sent Events (SSE)**.
@@ -10,12 +16,31 @@ The library focuses on **event invalidation**, not state replication.
 
 ---
 
+## Contents
+
+- [Why eventrail?](#why-eventrail)
+- [Core Concept: Event Invalidation](#core-concept-event-invalidation)
+- [High-Level Architecture](#high-level-architecture)
+- [Event Flow (CRUD → UI Update)](#event-flow-crud--ui-update)
+- [Official Conventions (Contract)](#official-conventions-contract)
+- [Installation](#installation)
+- [Basic Usage](#basic-usage)
+- [Graceful Shutdown](#graceful-shutdown)
+- [Examples](#examples)
+- [Authentication & Authorization](#authentication--authorization)
+- [Scalability Characteristics](#scalability-characteristics)
+- [Development](#development)
+- [License](#license)
+
+---
+
 ## Why eventrail?
 
 - No polling
 - No SPA complexity
 - No sticky sessions
 - No shared in-memory state between instances
+- Works well with SSR + htmx-style partial refresh
 
 ```
 CRUD → Redis → SSE → Browser → Fragment refresh
@@ -234,6 +259,12 @@ _ = pub.PublishEvent(ctx, channel, sse.Event{
   });
 </script>
 ```
+
+---
+
+## Examples
+
+- `examples/basic`: runnable SSE server with in-memory broker.
 
 ---
 
