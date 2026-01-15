@@ -11,6 +11,10 @@ type BrokerPubSub struct {
 	redisClient *redis.Client
 }
 
+func NewBrokerPubSub(redisClient *redis.Client) *BrokerPubSub {
+	return &BrokerPubSub{redisClient: redisClient}
+}
+
 type redisSubscription struct {
 	pubsub *redis.PubSub
 	ch     <-chan *redis.Message

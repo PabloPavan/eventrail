@@ -143,9 +143,12 @@ go get github.com/PabloPavan/eventrail@latest
 ### 1. Create the SSE Server
 
 ```go
-// Provide a broker that implements sse.Broker.
-// See sse/redis for a Redis Pub/Sub implementation reference.
-broker := myBroker
+rdb := redis.NewClient(&redis.Options{
+    Addr: "127.0.0.1:6379",
+})
+
+// sseredis is github.com/PabloPavan/eventrail/sse/redis
+broker := sseredis.NewBrokerPubSub(rdb)
 
 server, err := sse.NewServer(broker, sse.Options{
     Resolver: myResolver,

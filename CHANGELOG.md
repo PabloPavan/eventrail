@@ -6,6 +6,14 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-01-15
+
+### Added
+- `NewBrokerPubSub` constructor for Redis Pub/Sub broker.
+
+### Changed
+- README example now uses the Redis broker constructor.
+
 ## [0.1.0] - 2026-01-15
 
 ### Added
