@@ -35,7 +35,7 @@ func NewServer(broker Broker, options Options) (*Server, error) {
 		publisher: NewPublisher(broker),
 	}
 
-	s.hubs = newHubManager(broker, options)
+	s.hubs = newHubManager(options.Context, broker, options)
 	s.handler = newHandler(s.hubs, options)
 
 	return s, nil
@@ -47,4 +47,10 @@ func (s *Server) Handler() http.Handler {
 
 func (s *Server) Publisher() *Publisher {
 	return s.publisher
+}
+
+func (s *Server) Close() {
+	if s.hubs != nil {
+		s.hubs.stopAll()
+	}
 }

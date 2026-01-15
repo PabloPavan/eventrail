@@ -50,13 +50,15 @@ func newHandler(hubs *hubManager, opts Options) http.Handler {
 
 		for {
 			select {
+			case <-opts.Context.Done():
+				return
 			case <-r.Context().Done():
 				return
 			case <-heartbeatTicker.C:
 				_, _ = fmt.Fprintf(w, ": heartbeat\n\n")
 				flusher.Flush()
 
-			case msg, ok := <-client.messageChan:
+			case msg, ok := <-client.messageCh:
 				if !ok {
 					return
 				}

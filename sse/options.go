@@ -29,6 +29,7 @@ type Hooks struct {
 type Options struct {
 	Resolver PrincipalResolver
 	Router   ChannelRouter
+	Context  context.Context
 
 	HeartbeatInterval time.Duration
 	RetryMilliseconds int
@@ -44,6 +45,9 @@ type Options struct {
 }
 
 func applyDefaultOptions(opts *Options) {
+	if opts.Context == nil {
+		opts.Context = context.Background()
+	}
 	if opts.HeartbeatInterval == 0 {
 		opts.HeartbeatInterval = 30 * time.Second
 	}

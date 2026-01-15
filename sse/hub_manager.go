@@ -1,6 +1,7 @@
 package sse
 
 import (
+	"context"
 	"sync"
 	"time"
 )
@@ -9,15 +10,23 @@ type hubManager struct {
 	broker Broker
 	opts   Options
 
-	hubs map[int64]*Hub
-	mu   sync.RWMutex
+	hubs   map[int64]*Hub
+	mu     sync.RWMutex
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
-func newHubManager(broker Broker, options Options) *hubManager {
+func newHubManager(ctx context.Context, broker Broker, options Options) *hubManager {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	mctx, cancel := context.WithCancel(ctx)
 	m := &hubManager{
 		broker: broker,
 		opts:   options,
 		hubs:   make(map[int64]*Hub),
+		ctx:    mctx,
+		cancel: cancel,
 	}
 
 	go m.reaper()
@@ -29,7 +38,7 @@ func (hm *hubManager) getOrCreateHub(scopeID int64, patterns []string) *Hub {
 
 	hub, exists := hm.hubs[scopeID]
 	if !exists {
-		hub = newHub(hm.broker, hm.opts, scopeID, patterns)
+		hub = newHub(hm.ctx, hm.broker, hm.opts, scopeID, patterns)
 		hm.hubs[scopeID] = hub
 	}
 
@@ -40,14 +49,41 @@ func (hm *hubManager) reaper() {
 	t := time.NewTicker(30 * time.Second)
 	defer t.Stop()
 
-	for range t.C {
-		hm.mu.Lock()
-		for id, hub := range hm.hubs {
-			if hub.isIdle(hm.opts.HubIdleTimeout) {
+	for {
+		select {
+		case <-hm.ctx.Done():
+			hm.stopAll()
+			return
+		case <-t.C:
+			var idle []*Hub
+			hm.mu.Lock()
+			for id, hub := range hm.hubs {
+				if hub.isIdle(hm.opts.HubIdleTimeout) {
+					idle = append(idle, hub)
+					delete(hm.hubs, id)
+				}
+			}
+			hm.mu.Unlock()
+
+			for _, hub := range idle {
 				hub.stop()
-				delete(hm.hubs, id)
 			}
 		}
-		hm.mu.Unlock()
+	}
+}
+
+func (hm *hubManager) stopAll() {
+	hm.cancel()
+
+	var hubs []*Hub
+	hm.mu.Lock()
+	for id, hub := range hm.hubs {
+		hubs = append(hubs, hub)
+		delete(hm.hubs, id)
+	}
+	hm.mu.Unlock()
+
+	for _, hub := range hubs {
+		hub.stop()
 	}
 }

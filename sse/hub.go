@@ -7,7 +7,7 @@ import (
 )
 
 type client struct {
-	channelMessages chan []byte
+	messageCh chan []byte
 }
 
 type Hub struct {
@@ -16,6 +16,7 @@ type Hub struct {
 
 	broker Broker
 	opts   Options
+	ctx    context.Context
 
 	mu         sync.RWMutex
 	clients    map[*client]struct{}
@@ -26,12 +27,13 @@ type Hub struct {
 	running bool
 }
 
-func newHub(broker Broker, options Options, scopeID int64, patterns []string) *Hub {
+func newHub(ctx context.Context, broker Broker, options Options, scopeID int64, patterns []string) *Hub {
 	return &Hub{
 		scopeID:    scopeID,
 		patterns:   patterns,
 		broker:     broker,
 		opts:       options,
+		ctx:        ctx,
 		clients:    make(map[*client]struct{}),
 		lastActive: time.Now(),
 	}
@@ -41,7 +43,7 @@ func (h *Hub) addClient(buf int) *client {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	c := &client{channelMessages: make(chan []byte, buf)}
+	c := &client{messageCh: make(chan []byte, buf)}
 
 	h.clients[c] = struct{}{}
 	h.lastActive = time.Now()
@@ -58,14 +60,14 @@ func (h *Hub) removeClient(c *client) {
 	defer h.mu.Unlock()
 
 	if _, exists := h.clients[c]; exists {
-		close(c.channelMessages)
+		close(c.messageCh)
 		delete(h.clients, c)
 		h.lastActive = time.Now()
 	}
 }
 
 func (h *Hub) start() {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(h.ctx)
 	h.cancel = cancel
 	h.running = true
 
@@ -90,6 +92,16 @@ func (h *Hub) start() {
 }
 
 func (h *Hub) run(ctx context.Context, sub Subscription) {
+	defer func() {
+		h.mu.Lock()
+		if h.sub == sub {
+			h.running = false
+			h.sub = nil
+			h.cancel = nil
+		}
+		h.mu.Unlock()
+	}()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -104,15 +116,15 @@ func (h *Hub) run(ctx context.Context, sub Subscription) {
 }
 
 func (h *Hub) broadcast(payload []byte) {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-
+	var toRemove []*client
 	n := 0
+
+	h.mu.RLock()
 	switch h.opts.Backpressure {
 	case BackpressureDrop:
 		for c := range h.clients {
 			select {
-			case c.channelMessages <- payload:
+			case c.messageCh <- payload:
 				n++
 			default:
 				if h.opts.Hooks.OnClientDropped != nil {
@@ -123,20 +135,28 @@ func (h *Hub) broadcast(payload []byte) {
 	case BackpressureDisconnect:
 		for c := range h.clients {
 			select {
-			case c.channelMessages <- payload:
+			case c.messageCh <- payload:
 				n++
 			default:
-				h.mu.RUnlock()
-				h.removeClient(c)
-				h.mu.RLock()
+				toRemove = append(toRemove, c)
 			}
 		}
 	}
+	h.mu.RUnlock()
+
+	h.mu.Lock()
+	for _, c := range toRemove {
+		if _, exists := h.clients[c]; exists {
+			close(c.messageCh)
+			delete(h.clients, c)
+		}
+	}
+	h.lastActive = time.Now()
+	h.mu.Unlock()
+
 	if h.opts.Hooks.OnEventBroadcast != nil {
 		h.opts.Hooks.OnEventBroadcast(h.scopeID, n)
 	}
-
-	h.lastActive = time.Now()
 }
 
 func (h *Hub) stop() {
@@ -148,7 +168,7 @@ func (h *Hub) stop() {
 	h.sub = nil
 
 	for c := range h.clients {
-		close(c.channelMessages)
+		close(c.messageCh)
 		delete(h.clients, c)
 	}
 	h.mu.Unlock()
@@ -168,5 +188,5 @@ func (h *Hub) stop() {
 func (h *Hub) isIdle(timeout time.Duration) bool {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
-	return !h.running && len(h.clients) == 0 && time.Since(h.lastActive) > timeout
+	return len(h.clients) == 0 && time.Since(h.lastActive) > timeout
 }

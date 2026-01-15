@@ -175,6 +175,30 @@ r.Get("/events", func(w http.ResponseWriter, r *http.Request) {
 
 ---
 
+## Graceful Shutdown
+
+Use a base context to tie broker subscriptions to your app lifecycle, then call `Close()` when shutting down.
+Active SSE handlers also stop when this context is canceled.
+
+```go
+ctx, cancel := context.WithCancel(context.Background())
+
+server, err := sse.NewServer(broker, sse.Options{
+    Context:  ctx,
+    Resolver: myResolver,
+    Router:   myRouter,
+})
+if err != nil {
+    panic(err)
+}
+
+// On shutdown:
+cancel()
+server.Close()
+```
+
+---
+
 ### 3. Publish Events from Your CRUD
 
 ```go
