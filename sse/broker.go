@@ -14,6 +14,6 @@ type Subscription interface {
 }
 
 type Broker interface {
-	Subscribe(ctx context.Context, pattern ...string) (Subscription, error)
+	Subscribe(ctx context.Context, patterns ...string) (Subscription, error)
 	Publish(ctx context.Context, channel string, payload []byte) error
 }

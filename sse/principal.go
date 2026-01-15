@@ -3,8 +3,8 @@ package sse
 import "net/http"
 
 type Principal struct {
-	UserID    string
-	UserAgent string
+	UserID  int64
+	ScopeID int64
 }
 
 type PrincipalResolver interface {

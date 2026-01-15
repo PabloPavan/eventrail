@@ -27,12 +27,12 @@ type Hooks struct {
 }
 
 type Options struct {
-	Resolver      PrincipalResolver
-	ChannelRouter ChannelRouter
+	Resolver PrincipalResolver
+	Router   ChannelRouter
 
-	HeartbeatInterval  time.Duration
-	RetryeMilliseconds int
-	Headers            map[string]string
+	HeartbeatInterval time.Duration
+	RetryMilliseconds int
+	Headers           map[string]string
 
 	ClientBufferSize int
 	Backpressure     BackpressurePolicy
@@ -43,13 +43,26 @@ type Options struct {
 	Hooks Hooks
 }
 
-func DefaultOptions() *Options {
-	return &Options{
-		HeartbeatInterval:  30 * time.Second,
-		RetryeMilliseconds: 2000,
-		Headers:            map[string]string{},
-		ClientBufferSize:   64,
-		Backpressure:       BackpressureDisconnect,
-		HubIdleTimeout:     5 * time.Minute,
+func applyDefaultOptions(opts *Options) {
+	if opts.HeartbeatInterval == 0 {
+		opts.HeartbeatInterval = 30 * time.Second
+	}
+	if opts.RetryMilliseconds == 0 {
+		opts.RetryMilliseconds = 3000
+	}
+	if opts.ClientBufferSize == 0 {
+		opts.ClientBufferSize = 128
+	}
+	if opts.HubIdleTimeout == 0 {
+		opts.HubIdleTimeout = 5 * time.Minute
+	}
+	// if opts.EventEncoder == nil {
+	// 	opts.EventEncoder = DefaultEventEncoder
+	// }
+	if opts.Headers == nil {
+		opts.Headers = make(map[string]string)
+	}
+	if opts.Backpressure != BackpressureDrop && opts.Backpressure != BackpressureDisconnect {
+		opts.Backpressure = BackpressureDisconnect
 	}
 }
