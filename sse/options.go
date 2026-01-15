@@ -31,6 +31,8 @@ type Options struct {
 	Router   ChannelRouter
 	Context  context.Context
 
+	EventNamePrefix string
+
 	HeartbeatInterval time.Duration
 	RetryMilliseconds int
 	Headers           map[string]string
@@ -48,6 +50,10 @@ func applyDefaultOptions(opts *Options) {
 	if opts.Context == nil {
 		opts.Context = context.Background()
 	}
+	if opts.EventEncoder == nil {
+		opts.EventEncoder = defaultEventEncoder
+	}
+	opts.EventEncoder = applyEventNamePrefix(opts.EventEncoder, opts.EventNamePrefix)
 	if opts.HeartbeatInterval == 0 {
 		opts.HeartbeatInterval = 30 * time.Second
 	}
@@ -59,9 +65,6 @@ func applyDefaultOptions(opts *Options) {
 	}
 	if opts.HubIdleTimeout == 0 {
 		opts.HubIdleTimeout = 5 * time.Minute
-	}
-	if opts.EventEncoder == nil {
-		opts.EventEncoder = defaultEventEncoder
 	}
 	if opts.Headers == nil {
 		opts.Headers = make(map[string]string)

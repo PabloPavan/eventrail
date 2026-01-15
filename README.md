@@ -113,13 +113,15 @@ app.students.changed
 app.plans.created
 ```
 
+If `EventNamePrefix` is empty, the event name is just `{topic}.{action}`.
+
 ---
 
 ### Event Payload Structure
 
 ```json
 {
-  "type": "students.changed",
+  "event_type": "students.changed",
   "data": {
     "id": 123
   }
@@ -131,7 +133,7 @@ app.plans.created
 ## Installation
 
 ```bash
-go get github.com/seuuser/eventrail@v0.1.0
+go get github.com/PabloPavan/eventrail@latest
 ```
 
 ---
@@ -141,11 +143,9 @@ go get github.com/seuuser/eventrail@v0.1.0
 ### 1. Create the SSE Server
 
 ```go
-rdb := redis.NewClient(&redis.Options{
-    Addr: "127.0.0.1:6379",
-})
-
-broker := &sse.RedisPubSubBroker{Rdb: rdb}
+// Provide a broker that implements sse.Broker.
+// See sse/redis for a Redis Pub/Sub implementation reference.
+broker := myBroker
 
 server, err := sse.NewServer(broker, sse.Options{
     Resolver: myResolver,
@@ -206,9 +206,9 @@ pub := server.Publisher()
 
 channel := fmt.Sprintf("gym:%d:students", gymID)
 
-_ = pub.PublishJSON(ctx, channel, sse.Event{
-    Type: "students.changed",
-    Data: []byte(`{"id":123}`),
+_ = pub.PublishEvent(ctx, channel, sse.Event{
+    EventType: "students.changed",
+    Data:      json.RawMessage(`{"id":123}`),
 })
 ```
 
