@@ -2,7 +2,7 @@ package sse
 
 import "encoding/json"
 
-func DefaultEventEncoder(raw []byte) (eventtype string, data []byte, err error) {
+func defaultEventEncoder(raw []byte) (eventtype string, data []byte, err error) {
 	evtType := "message"
 	data = raw
 

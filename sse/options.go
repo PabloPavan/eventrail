@@ -56,9 +56,9 @@ func applyDefaultOptions(opts *Options) {
 	if opts.HubIdleTimeout == 0 {
 		opts.HubIdleTimeout = 5 * time.Minute
 	}
-	// if opts.EventEncoder == nil {
-	// 	opts.EventEncoder = DefaultEventEncoder
-	// }
+	if opts.EventEncoder == nil {
+		opts.EventEncoder = defaultEventEncoder
+	}
 	if opts.Headers == nil {
 		opts.Headers = make(map[string]string)
 	}
