@@ -261,6 +261,25 @@ The resolver defines:
 
 ---
 
+## Development
+
+Run checks locally:
+
+```bash
+go vet ./...
+golangci-lint run
+```
+
+Or via Makefile:
+
+```bash
+make vet
+make lint
+make check
+```
+
+---
+
 ## License
 
 MIT

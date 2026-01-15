@@ -1,0 +1,33 @@
+run:
+  timeout: 3m
+  tests: true
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - revive
+    - ineffassign
+    - unused
+    - unconvert
+    - gosimple
+    - gocritic
+    - bodyclose
+    - copyloopvar
+    - misspell
+    - nakedret
+
+linters-settings:
+  revive:
+    rules:
+      - name: exported
+        arguments:
+          - "checkPrivateReceivers"
+          - "sayRepetitiveInsteadOfStutters"
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
