@@ -1,4 +1,4 @@
-# EventRail
+<img src="https://github.com/user-attachments/assets/547a8afe-3815-49fc-a27d-6334be1bfbc7" alt="EventRail logo" width="320"/>
 
 [![Go Version](https://img.shields.io/badge/go-1.24+-00ADD8?logo=go&logoColor=white)](#installation)
 [![License](https://img.shields.io/badge/license-MIT-2ea44f)](#license)
@@ -13,26 +13,6 @@ It is designed for **horizontal scalability**, works naturally with **server-sid
 and keeps the backend as the **single source of truth**.
 
 The library focuses on **event invalidation**, not state replication.
-
----
-
-## Contents
-
-- [Why eventrail?](#why-eventrail)
-- [Core Concept: Event Invalidation](#core-concept-event-invalidation)
-- [High-Level Architecture](#high-level-architecture)
-- [Event Flow (CRUD → UI Update)](#event-flow-crud--ui-update)
-- [Official Conventions (Contract)](#official-conventions-contract)
-- [Installation](#installation)
-- [Basic Usage](#basic-usage)
-- [Graceful Shutdown](#graceful-shutdown)
-- [Examples](#examples)
-- [Authentication & Authorization](#authentication--authorization)
-- [Scalability Characteristics](#scalability-characteristics)
-- [Development](#development)
-- [License](#license)
-
----
 
 ## Why eventrail?
 
@@ -96,7 +76,9 @@ sequenceDiagram
     API->>Redis: Publish gym:1:students
     Redis-->>API: Fan-out event
     API-->>BrowserB: SSE event students.changed
+    API-->>UserA: SSE event stundents.changed 
     BrowserB->>API: htmx GET /students/fragment
+    UserA->>API: htmx GET /students/fragment
 ```
 
 ---
@@ -179,7 +161,7 @@ server, err := sse.NewServer(broker, sse.Options{
     Resolver: myResolver,
     Router: func(p *sse.Principal) []string {
         return []string{
-            fmt.Sprintf("gym:%d:*", p.ScopeID),
+            fmt.Sprintf("gym:%d:*", p.UserID),
         }
     },
     EventNamePrefix: "app",
