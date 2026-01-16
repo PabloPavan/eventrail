@@ -3,6 +3,7 @@
 [![Go Version](https://img.shields.io/badge/go-1.24+-00ADD8?logo=go&logoColor=white)](#installation)
 [![License](https://img.shields.io/badge/license-MIT-2ea44f)](#license)
 [![SSE](https://img.shields.io/badge/transport-SSE-6e40c9)](#basic-usage)
+![CI](https://github.com/PabloPavan/eventrail/actions/workflows/ci.yml/badge.svg)
 [![Release](https://img.shields.io/github/v/release/PabloPavan/eventrail?sort=semver)](https://github.com/PabloPavan/eventrail/releases)
 [![Redis](https://img.shields.io/badge/redis-Pub%2FSub-dc382d?logo=redis&logoColor=white)](#basic-usage)
 
