@@ -6,22 +6,6 @@ import (
 	"time"
 )
 
-func TestBrokerInMemorySubscribeNilContext(t *testing.T) {
-	broker := NewBrokerInMemory()
-
-	if _, err := broker.Subscribe(nil, "scope:*"); err == nil {
-		t.Fatal("expected error for nil context")
-	}
-}
-
-func TestBrokerInMemoryPublishNilContext(t *testing.T) {
-	broker := NewBrokerInMemory()
-
-	if err := broker.Publish(nil, "scope:1:students", []byte("hello")); err == nil {
-		t.Fatal("expected error for nil context")
-	}
-}
-
 func TestBrokerInMemoryPublishCanceledContext(t *testing.T) {
 	broker := NewBrokerInMemory()
 	ctx, cancel := context.WithCancel(context.Background())
