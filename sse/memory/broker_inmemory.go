@@ -1,4 +1,4 @@
-package main
+package memory
 
 import (
 	"context"
@@ -9,23 +9,23 @@ import (
 	"github.com/PabloPavan/eventrail/sse"
 )
 
-type inMemoryBroker struct {
+type BrokerInMemory struct {
 	mu   sync.RWMutex
 	subs map[*memSubscription]struct{}
 }
 
 type memSubscription struct {
-	broker   *inMemoryBroker
+	broker   *BrokerInMemory
 	patterns []string
 	ch       chan sse.BrokerMsg
 	once     sync.Once
 }
 
-func newInMemoryBroker() *inMemoryBroker {
-	return &inMemoryBroker{subs: make(map[*memSubscription]struct{})}
+func NewBrokerInMemory() *BrokerInMemory {
+	return &BrokerInMemory{subs: make(map[*memSubscription]struct{})}
 }
 
-func (b *inMemoryBroker) Subscribe(ctx context.Context, patterns ...string) (sse.Subscription, error) {
+func (b *BrokerInMemory) Subscribe(ctx context.Context, patterns ...string) (sse.Subscription, error) {
 	if ctx == nil {
 		return nil, errors.New("context cannot be nil")
 	}
@@ -48,7 +48,10 @@ func (b *inMemoryBroker) Subscribe(ctx context.Context, patterns ...string) (sse
 	return sub, nil
 }
 
-func (b *inMemoryBroker) Publish(ctx context.Context, channel string, payload []byte) error {
+func (b *BrokerInMemory) Publish(ctx context.Context, channel string, payload []byte) error {
+	if ctx == nil {
+		return errors.New("context cannot be nil")
+	}
 	if err := ctx.Err(); err != nil {
 		return err
 	}

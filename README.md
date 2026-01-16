@@ -171,6 +171,13 @@ if err != nil {
 }
 ```
 
+If you don't want Redis (single-process only):
+
+```go
+// ssememory is github.com/PabloPavan/eventrail/sse/memory
+broker := ssememory.NewBrokerInMemory()
+```
+
 ---
 
 ### 2. Register the SSE Route (Chi)

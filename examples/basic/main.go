@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/PabloPavan/eventrail/sse"
+	ssememory "github.com/PabloPavan/eventrail/sse/memory"
 )
 
 type resolverFunc func(*http.Request) (*sse.Principal, error)
@@ -48,7 +49,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	broker := newInMemoryBroker()
+	broker := ssememory.NewBrokerInMemory()
 
 	server, err := sse.NewServer(broker, sse.Options{
 		Context: ctx,
