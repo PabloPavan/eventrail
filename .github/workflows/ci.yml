@@ -27,7 +27,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
-          args: run
+          args: ./...
 
   integration-redis:
     runs-on: ubuntu-latest
