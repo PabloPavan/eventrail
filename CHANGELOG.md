@@ -6,6 +6,16 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-01-15
+
+### Added
+- Comprehensive unit tests for SSE core, publisher, and brokers.
+- Redis integration test gated by `INTEGRATION_REDIS_ADDR`.
+- GitHub Actions CI job for Redis integration testing.
+
+### Changed
+- CI now runs `go test ./...` and runs golangci-lint over `./...`.
+
 ## [0.1.2] - 2026-01-15
 
 ### Added
