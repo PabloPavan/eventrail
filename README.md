@@ -330,6 +330,12 @@ The resolver defines:
 
 ---
 
+## Contributing
+
+Contributions are welcome. By submitting a PR, you agree that your work is licensed under the MIT license and may be modified or rejected by maintainers. Please keep changes focused, include tests where it makes sense, and run the checks in the Development section.
+
+---
+
 ## Development
 
 Run checks locally:
