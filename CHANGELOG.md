@@ -6,6 +6,19 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-01-15
+
+### Added
+- In-memory broker package (`sse/memory`) with `NewBrokerInMemory` constructor.
+- README guidance to avoid self-notify in htmx by filtering SSE events via `origin_id`.
+
+### Changed
+- `examples/basic` now uses the shared in-memory broker package.
+- README includes an in-memory broker alternative for single-process setups.
+
+### Removed
+- Example-only in-memory broker implementation from `examples/basic`.
+
 ## [0.1.1] - 2026-01-15
 
 ### Added
